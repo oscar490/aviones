@@ -4,11 +4,14 @@ namespace app\controllers;
 
 use app\models\Reservas;
 use app\models\ReservasSearch;
+use app\models\Vuelos;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 /**
  * ReservasController implements the CRUD actions for Reservas model.
@@ -34,6 +37,17 @@ class ReservasController extends Controller
                     [
                         'allow' => true,
                         'actions' => ['index'],
+                        'roles' => ['@'],
+                    ],
+                ],
+            ],
+            'action' => [
+                'class' => AccessControl::className(),
+                'only' => ['mis-reservas'],
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['mis-reservas'],
                         'roles' => ['@'],
                     ],
                 ],
@@ -107,6 +121,41 @@ class ReservasController extends Controller
 
         return $this->render('update', [
             'model' => $model,
+        ]);
+    }
+
+    public function actionMisReservas()
+    {
+        $model = Reservas::find()
+            ->where(['usuario_id' => Yii::$app->user->id]);
+
+        $reserva = new Reservas();
+
+        $vuelosDisponibles = Vuelos::find()
+            ->select(['id_vuelo'])
+            ->indexBy('id')
+            ->column();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $model,
+        ]);
+
+        if (Yii::$app->request->isAjax) {
+            $reserva->load(Yii::$app->request->post());
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            if ($reserva->save()) {
+                return $reserva;
+            }
+        }
+
+        if ($reserva->load(Yii::$app->request->post()) && $reserva->save()) {
+            return $this->redirect(['reservas/mis-reservas']);
+        }
+
+        return $this->render('mis-reservas', [
+            'dataProvider' => $dataProvider,
+            'reserva' => $reserva,
+            'vuelosDisponibles' => $vuelosDisponibles,
         ]);
     }
 

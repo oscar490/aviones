@@ -34,26 +34,23 @@ class Reservas extends \yii\db\ActiveRecord
             [['usuario_id'], 'integer'],
             [['asiento'], 'required'],
             [['asiento'], 'number'],
-            [['vuelo_id'], function ($attribute, $params, $validator) {
-                $vuelo = Vuelos::findOne(['id_vuelo' => $this->$attribute]);
-                if ($vuelo !== null) {
-                    $this->$attribute = $vuelo->id;
-
-                    if ($vuelo->plazas == 0) {
-                        $this->$attribute = $this->getOldAttribute($attribute);
-                        $this->addError($attribute, 'No quedan plazas');
-                    }
-                } else {
-                    $this->addError($attribute, 'No existe el vuelo');
-                }
-            }],
             [['asiento'], function ($attribute, $params, $validator) {
-                $reserva = Reservas::findOne([
-                    'asiento' => $this->$attribute,
-                    'vuelo_id' => $this->vuelo_id,
-                ]);
+                $reserva = Reservas::find()
+                    ->where([
+                        'vuelo_id' => $this->vuelo_id,
+                        'asiento' => $this->asiento,
+                        'usuario_id' => $this->usuario_id,
+                    ])->one();
+
+                $vuelo = Vuelos::find()
+                    ->where(['id' => $this->vuelo_id])
+                    ->one();
+
                 if ($reserva !== null) {
-                    $this->addError($attribute, 'Ese asiento ya está reservado');
+                    $this->addError($attribute, 'Ese asiento está ocupado');
+                }
+                if ($vuelo->plazas == 0 || $this->asiento > $vuelo->plazas) {
+                    $this->addError($attribute, 'No hay plazas');
                 }
             }],
             [['usuario_id'], 'exist', 'skipOnError' => true, 'targetClass' => Usuarios::className(), 'targetAttribute' => ['usuario_id' => 'id']],
@@ -73,6 +70,11 @@ class Reservas extends \yii\db\ActiveRecord
             'asiento' => 'Número de asiento',
             'fecha_hora' => 'Fecha de reserva',
         ];
+    }
+
+    public function formName()
+    {
+        return '';
     }
 
     /**
