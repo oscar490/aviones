@@ -81,9 +81,9 @@ INSERT INTO companias (den_com)
     VALUES ('Vuelos Oscar'), ('Vuelos Mirame');
 
 INSERT INTO vuelos (id_vuelo, origen_id, destino_id, comp_id, salida, llegada, plazas, precio)
-    VALUES ('AA1111', 1, 2, 1, localtimestamp + '2 days'::interval, localtimestamp + '1 days'::interval, 10, 25.00),
-            ('AA2222', 2, 3, 1, localtimestamp + '1 days'::interval, localtimestamp + '1 days'::interval, 3, 25.00),
-            ('AA3333', 3, 2, 1, localtimestamp + '4 days'::interval, localtimestamp + '2 days'::interval, 10, 25.00);
+    VALUES ('AA1111', 1, 2, 1, localtimestamp + '1 days'::interval, localtimestamp + '2 days'::interval, 10, 25.00),
+            ('AA2222', 2, 3, 1, localtimestamp + '1 days'::interval, localtimestamp + '3 days'::interval, 3, 25.00),
+            ('AA3333', 3, 2, 1, localtimestamp + '2 days'::interval, localtimestamp + '4 days'::interval, 10, 25.00);
 
 INSERT INTO reservas (usuario_id, vuelo_id, asiento, fecha_hora)
-    VALUES (1, 1, 3, default), (2, 1, 4, default), (2, 3, 5, localtimestamp + '3 days'::interval);
+    VALUES (1, 1, 3, default), (2, 1, 4, default), (2, 3, 5, localtimestamp );
